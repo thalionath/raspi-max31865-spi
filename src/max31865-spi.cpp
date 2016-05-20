@@ -105,7 +105,7 @@ public:
 		spi_.transfer({ 0x80, 0x80 | 0x40 });
 	}
 
-	double read()
+	std::vector<uint8_t> read()
 	{
 		// read 3 registers from register address 0x00
 		const auto rx = spi_.transfer({ 0x00, 0xFF, 0xFF, 0xFF });
@@ -113,11 +113,11 @@ public:
 		const uint16_t rtd = (rx[2] << 8u) | (rx[3] << 0u);
 		const uint16_t adc = rtd >> 1u;
 
-		const double temp = adc * 0.031249727 + (-255.9977596);
+		// const double temp = adc * 0.031249727 + (-255.9977596);
 
 		// printf("status: 0x%02X, rtd: 0x%04X, adc: %u, temp: %.3f\r\n", rx[1], rtd, adc, temp);
 
-		return temp;
+		return std::vector<uint8_t>(rx.begin() + 1, rx.end());
 	}
 };
 
@@ -289,7 +289,8 @@ int main(int argc, char **argv)
 				);
 
 				publisher.send(
-					&value, sizeof(value)
+					value.begin(),
+					value.end()
 				);				
 			}
 
